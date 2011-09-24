@@ -1,8 +1,22 @@
 #!/usr/bin/env python
-import re, subprocess
+import re
+from subprocess import *
 
-ETH0_RE = re.compile('eth0.+?^4', re.S, re.M)
 
-def getIp():
-   #TODO everything! 
-    
+INTERFACE = 'wlan0'
+
+ADDR_RE = re.compile('inet addr.+? ', re.M)
+
+def getIp(interface=INTERFACE):
+    ifconfig = Popen("ifconfig %s" % interface, shell=True, stdout=PIPE).stdout
+    output = ifconfig.read()
+    ip = ADDR_RE.findall(output)
+    if len(ip) > 0:
+        return ip[0][10:-1]
+    else:
+        return None
+
+
+if __name__ == '__main__':
+    print getIp('lo')
+
