@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import re, os
+import re, os, urllib2, time
 import tweepy
 from subprocess import *
 
@@ -11,6 +11,11 @@ AUTH_FILE = os.path.expanduser('~/.pypmon')
 INTERFACE = 'wlan0'
 
 ADDR_RE = re.compile('inet addr.+? ', re.M)
+
+def getWanIp():
+    #get the ip from icanhazip.com
+    ip = urllib2.urlopen('http://icanhazip.com/').read()
+    return ip.strip()
 
 def getIp(interface=INTERFACE):
     ifconfig = Popen("ifconfig %s" % interface, shell=True, stdout=PIPE).stdout
@@ -35,7 +40,7 @@ def authorize():
     
 
 def sendIp(ACCESS_KEY, ACCESS_SECRET):
-    message = '''My current IP is %s. ''' % getIp()
+    message = '''LAN IP :  %s - WAN IP : %s - Time : %s seconds since the epoch''' % (getIp(), getWanIp(), time.time())
     auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
     auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
     api = tweepy.API(auth)
