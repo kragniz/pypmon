@@ -1,7 +1,17 @@
 #!/usr/bin/env python
-import re
+import re, os
+import tweepy
 from subprocess import *
 
+CONSUMER_KEY = 'jNyV9FHa6rwZG2RmfFfLjw'
+CONSUMER_SECRET = 'HJjWidPugUahDM8sY9XcrQSoN9LaJAVCzxq5T9jp68'
+if os.path.isfile('~/.pypmon'): 
+    authFile = open('~/.pypmon').readlines()
+    ACCESS_KEY = authFile[0]
+    ACCESS_SECRET = authFile[1]
+else:
+    ACCESS_KEY, ACCESS_SECRET = authorize()
+    open('~/.pypmon').write('%s\n%s' % (ACCESS_KEY, ACCESS_SECRET)).close()
 
 INTERFACE = 'wlan0'
 
@@ -16,6 +26,21 @@ def getIp(interface=INTERFACE):
     else:
         return None
 
+def authorize():
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth_url = auth.get_authorization_url()
+    print 'Please authorize: ' + auth_url
+    verifier = raw_input('PIN: ').strip()
+    auth.get_access_token(verifier)
+    accessKey = auth.access_token.key
+    accessSecret = auth.access_token.secret
+    print "ACCESS_KEY = '%s'" % accessKey
+    print "ACCESS_SECRET = '%s'" % accessSecret
+    return accessKey, accessSecret
+    
+
+def sendIp(self):
+    message = '''My current IP is %s. '''
 
 if __name__ == '__main__':
     print getIp('lo')
