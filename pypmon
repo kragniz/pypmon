@@ -5,13 +5,8 @@ from subprocess import *
 
 CONSUMER_KEY = 'jNyV9FHa6rwZG2RmfFfLjw'
 CONSUMER_SECRET = 'HJjWidPugUahDM8sY9XcrQSoN9LaJAVCzxq5T9jp68'
-if os.path.isfile('~/.pypmon'): 
-    authFile = open('~/.pypmon').readlines()
-    ACCESS_KEY = authFile[0]
-    ACCESS_SECRET = authFile[1]
-else:
-    ACCESS_KEY, ACCESS_SECRET = authorize()
-    open('~/.pypmon').write('%s\n%s' % (ACCESS_KEY, ACCESS_SECRET)).close()
+
+AUTH_FILE = os.path.expanduser('~/.pypmon')
 
 INTERFACE = 'wlan0'
 
@@ -39,9 +34,22 @@ def authorize():
     return accessKey, accessSecret
     
 
-def sendIp(self):
-    message = '''My current IP is %s. '''
+def sendIp(ACCESS_KEY, ACCESS_SECRET):
+    message = '''My current IP is %s. ''' % getIp()
+    auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+    auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+    api = tweepy.API(auth)
+    api.update_status(message)
 
 if __name__ == '__main__':
     print getIp('lo')
-
+    if os.path.isfile(AUTH_FILE):
+        authFile = open(AUTH_FILE).readlines()
+        ACCESS_KEY = authFile[0].strip()
+        ACCESS_SECRET = authFile[1].strip()
+    else:
+        ACCESS_KEY, ACCESS_SECRET = authorize()
+        authFile = open(AUTH_FILE, 'w')
+        authFile.write('%s\n%s' % (ACCESS_KEY, ACCESS_SECRET))
+        authFile.close()
+    sendIp(ACCESS_KEY, ACCESS_SECRET)
