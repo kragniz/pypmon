@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import re, os, urllib2, time
+import re, os, sys, urllib2, time
 import tweepy
 from subprocess import *
 
@@ -8,7 +8,7 @@ CONSUMER_SECRET = 'HJjWidPugUahDM8sY9XcrQSoN9LaJAVCzxq5T9jp68'
 
 AUTH_FILE = os.path.expanduser('~/.pypmon')
 
-INTERFACE = 'wlan0'
+INTERFACE = 'eth0'
 
 ADDR_RE = re.compile('inet addr.+? ', re.M)
 
@@ -47,14 +47,20 @@ def sendIp(ACCESS_KEY, ACCESS_SECRET):
     api.update_status(message)
 
 if __name__ == '__main__':
-    print getIp('lo')
-    if os.path.isfile(AUTH_FILE):
-        authFile = open(AUTH_FILE).readlines()
-        ACCESS_KEY = authFile[0].strip()
-        ACCESS_SECRET = authFile[1].strip()
+    if len(sys.agrv) > 1:
+        pauseTime = sys.argv[1]
     else:
-        ACCESS_KEY, ACCESS_SECRET = authorize()
-        authFile = open(AUTH_FILE, 'w')
-        authFile.write('%s\n%s' % (ACCESS_KEY, ACCESS_SECRET))
-        authFile.close()
-    sendIp(ACCESS_KEY, ACCESS_SECRET)
+        pauseTime = 10000
+
+    while True:
+        if os.path.isfile(AUTH_FILE):
+            authFile = open(AUTH_FILE).readlines()
+            ACCESS_KEY = authFile[0].strip()
+            ACCESS_SECRET = authFile[1].strip()
+        else:
+            ACCESS_KEY, ACCESS_SECRET = authorize()
+            authFile = open(AUTH_FILE, 'w')
+            authFile.write('%s\n%s' % (ACCESS_KEY, ACCESS_SECRET))
+            authFile.close()
+        sendIp(ACCESS_KEY, ACCESS_SECRET)
+        time.sleep(pauseTime)
